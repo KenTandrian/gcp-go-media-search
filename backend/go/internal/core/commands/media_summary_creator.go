@@ -158,6 +158,22 @@ func (t *MediaSummaryCreator) Execute(context cor.Context) {
 			Role: "user"},
 	}
 
+	// Get the category from the summary
+	summary := model.GetExampleSummary()
+	category, ok := t.config.Categories[summary.Category]
+	if !ok {
+		t.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(t.GetName(), fmt.Errorf("invalid category: %s", summary.Category))
+		return
+	}
+
+	// Override system instructions if the category provides one.
+	if category.SystemInstructions != "" {
+		t.generativeAIModel.GetModel().SystemInstruction = &genai.Content{
+			Parts: []*genai.Part{{Text: category.SystemInstructions}},
+		}
+	}
+
 	// Call the helper function to send the request to the model. This helper
 	// encapsulates retry logic and telemetry updates.
 	// Muziris Change
