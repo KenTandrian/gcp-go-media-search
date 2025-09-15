@@ -56,8 +56,14 @@ variable "app_service_account" {
     default = "media-search-sa"
 }
 
-variable "release" {
+variable "git_repository_url" {
   type        = string
-  description = "The release tag for the setup scripts."
-  default     = "release-latest"
+  description = "The URL of the Git repository to clone for the application source code."
+  default     = "https://github.com/KenTandrian/gcp-go-media-search.git"
+}
+
+variable "git_branch" {
+  type        = string
+  description = "The branch of the Git repository to check out."
+  default     = "dev"
 }

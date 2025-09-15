@@ -67,7 +67,8 @@ resource "google_compute_instance" "server_vm" {
     # We use a template file to keep the main Terraform file clean and pass
     # variables to the script.
     startup-script = templatefile("${path.module}/templates/compute-startup-script.sh.tpl", {
-      release               = var.release
+      git_repository_url    = var.git_repository_url
+      git_branch            = var.git_branch
       project_id            = local.project.id
       region                = local.location.region
       service_account_email = google_service_account.media-search-sa.email

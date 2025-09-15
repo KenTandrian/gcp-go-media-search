@@ -4,7 +4,7 @@
 # --- Part 1: Run on every boot ---
 # Update and upgrade packages.
 echo "--- Updating system packages... ---"
-apt update -qq && apt upgrade -qq -y && apt autoremove -qq -y
+apt update -qq && apt upgrade -qq -y && apt autoremove -qq -y && apt install -qq -y git
 
 # --- Part 2: Run only on first boot ---
 echo "--- Checking if first boot initialization is needed... ---"
@@ -21,12 +21,11 @@ if [ ! -f "$INIT_LOCK_FILE" ]; then
     # Explicitly set HOME for the root user to ensure tools are installed in /root.
     export HOME="/root"
 
+    echo "--> Installing application source code from Git..."
+    git clone --branch ${git_branch} ${git_repository_url} /opt/media-search
+    
     echo "--> Running environment setup script (Go, Node, etc.)..."
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/jaycherian/gcp-go-media-search/refs/tags/${release}/deploy/scripts/setup-server.sh)"
-
-    echo "--> Installing application source code..."
-    mkdir -p /opt/media-search
-    curl -L https://github.com/jaycherian/gcp-go-media-search/archive/refs/tags/${release}.tar.gz | tar -xz --strip-components=1 -C /opt/media-search
+    bash /opt/media-search/deploy/scripts/setup-server.sh
 
     echo "--> Creating backend .env.local.toml configuration file..."
     mkdir -p /opt/media-search/backend/go/configs
