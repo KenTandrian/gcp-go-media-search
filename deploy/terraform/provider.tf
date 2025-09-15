@@ -13,6 +13,10 @@
 # limitations under the License.
 
 terraform {
+  backend "gcs" {
+    bucket = "kentandrian-media-search-1"
+    prefix = "gcp-go-media-search/state"
+  }
   required_providers {
     google = {
       source  = "hashicorp/google"
