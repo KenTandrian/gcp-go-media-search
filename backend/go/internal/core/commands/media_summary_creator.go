@@ -43,6 +43,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"text/template"
 
 	"go.opentelemetry.io/otel/metric"
@@ -102,8 +103,12 @@ func NewMediaSummaryCreator(
 //
 // Outputs:
 //   - map[string]interface{}: A map of keys and values for template substitution.
-func (t *MediaSummaryCreator) GenerateParams(_ cor.Context) map[string]interface{} {
+func (t *MediaSummaryCreator) GenerateParams(_ cor.Context, mediaFile *genai.FileData) map[string]interface{} {
 	params := make(map[string]interface{})
+
+	// Extract the filename from the URI to pass to the prompt.
+	_, fileName := filepath.Split(mediaFile.FileURI)
+	params["FILENAME"] = fileName
 
 	// Create a string representation of the media categories from the config
 	// to help the model choose a valid category. Example: "trailer - A short...; movie - A feature..."
@@ -130,7 +135,7 @@ func (t *MediaSummaryCreator) Execute(context cor.Context) {
 
 	// Use a buffer to execute the Go template, substituting the dynamic params.
 	var buffer bytes.Buffer
-	err := t.template.Execute(&buffer, t.GenerateParams(context))
+	err := t.template.Execute(&buffer, t.GenerateParams(context, mediaFile))
 	if err != nil {
 		t.GetErrorCounter().Add(context.GetContext(), 1)
 		context.AddError(t.GetName(), fmt.Errorf("failed to execute prompt template: %w", err))
@@ -156,22 +161,6 @@ func (t *MediaSummaryCreator) Execute(context cor.Context) {
 			}},
 		},
 			Role: "user"},
-	}
-
-	// Get the category from the summary
-	summary := model.GetExampleSummary()
-	category, ok := t.config.Categories[summary.Category]
-	if !ok {
-		t.GetErrorCounter().Add(context.GetContext(), 1)
-		context.AddError(t.GetName(), fmt.Errorf("invalid category: %s", summary.Category))
-		return
-	}
-
-	// Override system instructions if the category provides one.
-	if category.SystemInstructions != "" {
-		t.generativeAIModel.GetModel().SystemInstruction = &genai.Content{
-			Parts: []*genai.Part{{Text: category.SystemInstructions}},
-		}
 	}
 
 	// Call the helper function to send the request to the model. This helper
