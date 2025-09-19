@@ -162,6 +162,12 @@ func NewCloudServiceClients(ctx context.Context, config *Config) (cloud *Service
 			ResponseMIMEType:  values.OutputFormat,
 			Tools:             []*genai.Tool{},
 		}
+
+		if values.EnableGoogle {
+			model.Tools = []*genai.Tool{
+				{GoogleSearch: &genai.GoogleSearch{}},
+			}
+		}
 		// 	model.SetTemperature(values.Temperature)
 		// 	model.SetTopK(values.TopK)
 		// 	model.SetTopP(values.TopP)
