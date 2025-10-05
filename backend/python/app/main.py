@@ -60,6 +60,20 @@ def get_scene_details(media_id: str, scene_sequence: int):
         raise HTTPException(status_code=404, detail="Scene not found")
     return scene
 
+@app.get("/api/v1/media/{media_id}/stream")
+def get_media_stream_url(media_id: str):
+    """Generates a time-limited, signed URL for securely streaming a media file."""
+    assert state.media_service is not None
+    media = state.media_service.get(media_id)
+    if not media:
+        raise HTTPException(status_code=404, detail="Media not found")
+
+    try:
+        signed_url = state.media_service.generate_signed_url(media.media_url)
+        return {"url": signed_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not generate streaming URL: {e}")
+
 @app.post("/api/v1/uploads")
 def upload_media_files(files: List[UploadFile] = File(...)):
     """Handles multipart/form-data file uploads to Google Cloud Storage."""

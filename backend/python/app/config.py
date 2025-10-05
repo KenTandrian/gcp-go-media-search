@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     bigquery_media_table: str = "media"
     bigquery_embeddings_table: str = "scene_embeddings"
     gcs_upload_bucket: str = ""
+    signer_email: str = "" # The service account email to use for signing URLs
 
     # --- AI Model Settings ---
     summary_model_name: str = "gemini-2.5-pro"

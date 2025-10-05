@@ -24,7 +24,8 @@ class AppState:
         self.storage_client = storage.Client(project=settings.google_cloud_project)
 
         self.media_service = MediaService(
-            client=self.bq_client,
+            bq_client=self.bq_client,
+            storage_client=self.storage_client,
             dataset_name=settings.bigquery_dataset,
             media_table=settings.bigquery_media_table
         )

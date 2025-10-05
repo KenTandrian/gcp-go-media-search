@@ -4,15 +4,18 @@ from google.cloud import storage
 def get_gcs_parts(gcs_uri: str) -> tuple[str, str]:
     """
     Parses a GCS URI into its bucket and object name components.
-    Example: "gs://my-bucket/my-folder/my-file.txt" -> ("my-bucket", "my-folder/my-file.txt")
+    It can handle both "gs://" and "https://storage.mtls.cloud.google.com/" formats.
     """
-    if not gcs_uri.startswith("gs://"):
+    if gcs_uri.startswith("gs://"):
+        parts = gcs_uri[5:].split("/", 1)
+    elif gcs_uri.startswith("https://storage.mtls.cloud.google.com/"):
+        parts = gcs_uri[38:].split("/", 1)
+    else:
         raise ValueError(f"Invalid GCS URI format: {gcs_uri}")
-    
-    parts = gcs_uri[5:].split("/", 1)
+
     if len(parts) < 2:
         raise ValueError(f"Invalid GCS URI: unable to determine bucket and object from {gcs_uri}")
-        
+
     bucket_name, object_name = parts
     return bucket_name, object_name
 
