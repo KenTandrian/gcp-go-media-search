@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     bigquery_dataset: str = "media_ds"
     bigquery_media_table: str = "media"
     bigquery_embeddings_table: str = "scene_embeddings"
-    gcs_upload_bucket: str = ""
+    gcs_hi_res_upload_bucket: str = ""
+    gcs_lo_res_output_bucket: str = ""
     signer_email: str = "" # The service account email to use for signing URLs
 
     # --- AI Model Settings ---

@@ -1,8 +1,10 @@
 from google.cloud import bigquery, storage
-from ..services import MediaService
-from ..search import SearchService
-from ..upload import GCSUploader
+
 from ..config import settings
+from ..search import SearchService
+from ..services import MediaService
+from ..upload import GCSUploader
+
 
 class AppState:
     """
@@ -38,7 +40,7 @@ class AppState:
 
         self.gcs_uploader = GCSUploader(
             client=self.storage_client,
-            bucket_name=settings.gcs_upload_bucket
+            bucket_name=settings.gcs_hi_res_upload_bucket
         )
         print("Application state initialized.")
 
