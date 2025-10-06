@@ -25,11 +25,15 @@ FROM nginx:1.29-alpine
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy the custom Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy the Nginx configuration template and startup script
+COPY nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
+COPY scripts/start-nginx.sh /start-nginx.sh
+
+# Make the startup script executable
+RUN chmod +x /start-nginx.sh
 
 # Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use the script to start Nginx
+CMD ["/start-nginx.sh"]
