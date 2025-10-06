@@ -1,9 +1,14 @@
 from datetime import timedelta
-from google.cloud import bigquery, storage
 from typing import Optional
+
+import google.auth
+from google.auth import impersonated_credentials
+from google.cloud import bigquery, storage
+
 from . import models
 from .cloud import utils as cloud_utils
 from .config import settings
+
 
 class MediaService:
     def __init__(self, bq_client: bigquery.Client, storage_client: storage.Client, dataset_name: str, media_table: str):
@@ -19,12 +24,22 @@ class MediaService:
             bucket = self.storage_client.bucket(bucket_name)
             blob = bucket.blob(object_name)
 
+            # Get the default credentials from the environment
+            credentials, project_id = google.auth.default()
+
+            # Create impersonated credentials
+            target_credentials = impersonated_credentials.Credentials(
+                source_credentials=credentials,
+                target_principal=settings.signer_email,
+                target_scopes=["https://www.googleapis.com/auth/devstorage.read_only"],
+            )
+
             # Generate the signed URL
             url = blob.generate_signed_url(
                 version="v4",
                 expiration=timedelta(minutes=expires_in_minutes),
                 method="GET",
-                service_account_email=settings.signer_email,
+                credentials=target_credentials,
             )
             return url
         except Exception as e:
